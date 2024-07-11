@@ -97,15 +97,15 @@ def generate_spin(
 ) -> Float[Tensor, "batch 4 4"]:
     # Translate back along the camera's look vector.
     tf_translation = torch.eye(4, dtype=torch.float32, device=device)
-    tf_translation[2, 3] = -radius
-    tf_translation[:2, :2] *= -1  # Use +Y as world up instead of -Y.
+    tf_translation[2, 3] = -radius # Move the camera by distance radius along with Z-dir.
+    tf_translation[:2, :2] *= -1  # Use +Y as world up instead of -Y. (X: Right => Left, Y: Down => Up, Z: Forward => Forward)
 
     # Generate the transformation for the azimuth.
     t = np.linspace(0, 1, num_steps, endpoint=False)
     azimuth = [
         R.from_rotvec(np.array([0, x * 2 * np.pi, 0], dtype=np.float32)).as_matrix()
         for x in t
-    ]
+    ] # Rotate the camera along with Y-dir by x * 2 * np.pi
     azimuth = torch.tensor(np.array(azimuth), dtype=torch.float32, device=device)
     tf_azimuth = torch.eye(4, dtype=torch.float32, device=device)
     tf_azimuth = repeat(tf_azimuth, "i j -> b i j", b=num_steps).clone()
@@ -118,7 +118,9 @@ def generate_spin(
     tf_elevation = torch.eye(4, dtype=torch.float32, device=device)
     tf_elevation[:3, :3] = elevation
 
-    return tf_azimuth @ tf_elevation @ tf_translation
+    tf_total = tf_azimuth @ tf_elevation @ tf_translation
+
+    return tf_total
 
 
 def plot_point_cloud(

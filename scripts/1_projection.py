@@ -12,11 +12,11 @@ if __name__ == "__main__":
 
     # Generate a set of camera extrinsics for rendering.
     NUM_STEPS = 16
-    c2w = generate_spin(NUM_STEPS, 15.0, 2.0)
+    c2w = generate_spin(NUM_STEPS, elevation=10.0, radius=2.0)
 
     # Generate a set of camera intrinsics for rendering.
     k = torch.eye(3, dtype=torch.float32)
-    k[:2, 2] = 0.5
+    k[:2, 2] = 0.5 # Set the principle point to the center. from 0 to 0.5 as the image center.
     k = repeat(k, "i j -> b i j", b=NUM_STEPS)
 
     # Render the point cloud.
