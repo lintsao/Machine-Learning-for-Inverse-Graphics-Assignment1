@@ -46,15 +46,18 @@ def convert_to_opencv_format(extrinsic):
     up_candidates = [R[:, i] for i in range(3)]
     dot_products = [torch.dot(up_candidate, torch.tensor([0, 1, 0], dtype=torch.float32)) for up_candidate in up_candidates]
     up_vector = normalize_vector(up_candidates[torch.argmax(torch.tensor(dot_products))])
+    # print(up_vector, look_vector)
 
     # Compute right vector using cross product
     right_vector = normalize_vector(torch.cross(up_vector, look_vector))
 
-    # Recompute up vector to ensure orthogonality
-    up_vector = torch.cross(look_vector, right_vector)
+    # # Recompute up vector to ensure orthogonality
+    # up_vector = normalize_vector(torch.cross(look_vector, right_vector))
+    # print(up_vector)
 
     # Construct the new rotation matrix in OpenCV format
     new_R = torch.stack([right_vector, -up_vector, look_vector], dim=1)
+    # print(new_R)
 
     # Construct the new extrinsic matrix
     new_extrinsic = torch.eye(4, dtype=torch.float32)
